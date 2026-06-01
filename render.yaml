@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: sidlocker
+    runtime: node
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && node scripts/seed.js && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./prisma/sidlocker.db
+      - key: NEXTAUTH_URL
+        fromService:
+          type: web
+          name: sidlocker
+          property: host
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      # Set these manually in Render dashboard:
+      # AUTH_EMAIL
+      # AUTH_USERNAME
+      # AUTH_PASSWORD_HASH
+    disk:
+      name: sidlocker-data
+      mountPath: /opt/render/project/src
+      sizeGB: 10

@@ -1,0 +1,114 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  username      String    @unique
+  passwordHash  String
+  displayName   String    @default("Siddharth")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLogin     DateTime?
+  totalStorage  Int       @default(0)
+
+  files         File[]
+  uploadHistory UploadHistory[]
+  downloadHistory DownloadHistory[]
+  exportHistory ExportHistory[]
+  activityLogs  ActivityLog[]
+}
+
+model Folder {
+  id          String    @id @default(cuid())
+  name        String
+  displayName String
+  path        String    @unique
+  parentId    String?
+  category    String    // ssc, hsc, bsc_cs, mca, others, photos
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  parent      Folder?   @relation("FolderParent", fields: [parentId], references: [id])
+  children    Folder[]  @relation("FolderParent")
+  files       File[]
+}
+
+model File {
+  id           String    @id @default(cuid())
+  filename     String
+  displayName  String
+  originalName String
+  extension    String
+  mimeType     String
+  size         Int       // in bytes
+  path         String    // relative path from public/uploads/
+  virtualPath  String    // display path e.g. Documents > SSC > Marksheet
+  category     String
+  folderId     String?
+  userId       String
+  uploadedAt   DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  tags         String    @default("") // comma-separated tags
+  description  String    @default("")
+  isDeleted    Boolean   @default(false)
+  deletedAt    DateTime?
+
+  folder       Folder?   @relation(fields: [folderId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+  downloadHistory DownloadHistory[]
+}
+
+model UploadHistory {
+  id         String   @id @default(cuid())
+  userId     String
+  filename   String
+  fileSize   Int
+  category   String
+  status     String   @default("success") // success | failed
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model DownloadHistory {
+  id         String   @id @default(cuid())
+  userId     String
+  fileId     String
+  filename   String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id])
+  file       File     @relation(fields: [fileId], references: [id])
+}
+
+model ExportHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  exportType  String   // zip | pdf | merge
+  fileCount   Int
+  totalSize   Int
+  status      String   @default("success")
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String
+  action      String   // LOGIN | UPLOAD | DOWNLOAD | EXPORT | DELETE | RENAME | MOVE
+  description String
+  metadata    String   @default("{}") // JSON string
+  ipAddress   String   @default("")
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+}
