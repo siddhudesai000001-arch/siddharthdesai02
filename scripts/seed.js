@@ -167,7 +167,7 @@ async function main() {
   }
 
   // 3. Scan and seed files
-  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+  const uploadsDir = process.env.UPLOADS_PATH || path.join(process.cwd(), 'public', 'uploads');
   const files = scanUploads(uploadsDir);
 
   console.log(`\n📂 Found ${files.length} files in uploads directory`);
