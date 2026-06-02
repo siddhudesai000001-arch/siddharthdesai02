@@ -77,6 +77,13 @@ export const authOptions: NextAuthOptions = {
     maxAge: 30 * 24 * 60 * 60,
   },
   callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Always allow relative URLs
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      // Allow same origin
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
