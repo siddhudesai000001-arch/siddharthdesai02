@@ -20,7 +20,8 @@ export async function GET(req: NextRequest) {
   if (!file) return NextResponse.json({ error: 'File not found' }, { status: 404 });
 
   try {
-    const filePath = path.join(process.cwd(), 'public', 'uploads', file.path);
+    const uploadsBase = process.env.UPLOADS_PATH || path.join(process.cwd(), 'public', 'uploads');
+    const filePath = path.join(uploadsBase, file.path);
     const buffer = await readFile(filePath);
 
     // Log download
