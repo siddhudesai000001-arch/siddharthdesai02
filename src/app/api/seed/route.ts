@@ -34,7 +34,7 @@ export async function POST() {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const userId = (session.user as any).id;
-  const uploadsDir = path.join(process.cwd(), 'public', 'uploads');
+  const uploadsDir = process.env.UPLOADS_PATH || path.join(process.cwd(), 'public', 'uploads');
   const files = scanDir(uploadsDir, '');
 
   let added = 0;
