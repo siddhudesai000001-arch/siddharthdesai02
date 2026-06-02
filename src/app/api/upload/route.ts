@@ -57,8 +57,11 @@ export async function POST(req: NextRequest) {
 
       try {
         // Determine storage path
+        // Use persistent disk on Render (/opt/render/project/data/uploads)
+        // Fall back to public/uploads for local dev
         const categoryPath = CATEGORY_TO_PATH[category] || 'documents/others';
-        const storageDir = path.join(process.cwd(), 'public', 'uploads', categoryPath);
+        const uploadsBase = process.env.UPLOADS_PATH || path.join(process.cwd(), 'public', 'uploads');
+        const storageDir = path.join(uploadsBase, categoryPath);
 
         await mkdir(storageDir, { recursive: true });
 
@@ -69,6 +72,7 @@ export async function POST(req: NextRequest) {
         const filePath = path.join(storageDir, filename);
         await writeFile(filePath, buffer);
 
+        // Store the full absolute path so we can serve it regardless of cwd
         const relativePath = `${categoryPath}/${filename}`;
         const virtualPath = categoryPath
           .split('/')
