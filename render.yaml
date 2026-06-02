@@ -8,12 +8,13 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        value: file:./prisma/sidlocker.db
+        value: file:/opt/render/project/data/sidlocker.db
+      - key: UPLOADS_PATH
+        value: /opt/render/project/data/uploads
       - key: NEXTAUTH_URL
-        fromService:
-          type: web
-          name: sidlocker
-          property: host
+        sync: false
+        # IMPORTANT: Set this manually in Render dashboard to your full URL
+        # e.g. https://sidlocker.onrender.com
       - key: NEXTAUTH_SECRET
         generateValue: true
       # Set these manually in Render dashboard:
@@ -22,5 +23,5 @@ services:
       # AUTH_PASSWORD_HASH
     disk:
       name: sidlocker-data
-      mountPath: /opt/render/project/src
+      mountPath: /opt/render/project/data
       sizeGB: 10
